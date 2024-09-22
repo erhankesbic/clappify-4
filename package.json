@@ -23,9 +23,11 @@
   },
   "dependencies": {
     "@radix-ui/react-toast": "^1.1.5",
-    "@stripe/stripe-js": "2.4.0",
+    "@stripe/react-stripe-js": "^2.8.0",
+    "@stripe/stripe-js": "^2.4.0",
     "@supabase/ssr": "^0.1.0",
     "@supabase/supabase-js": "^2.43.4",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

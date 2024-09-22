@@ -9,8 +9,10 @@ export const stripe = new Stripe(
     apiVersion: null,
     // Register this as an official Stripe plugin.
     // https://stripe.com/docs/building-plugins#setappinfo
+
+
     appInfo: {
-      name: 'Next.js Subscription Starter',
+      name: 'clappify-4',
       version: '0.0.0',
       url: 'https://github.com/vercel/nextjs-subscription-payments'
     }
