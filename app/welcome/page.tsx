@@ -16,3 +16,4 @@ export default async function Welcome() {
       <h1>Welcome, {user.email}</h1>
     </div>
   );
+}
