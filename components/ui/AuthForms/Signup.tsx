@@ -70,13 +70,6 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
           Sign in with email and password
         </Link>
       </p>
-      {allowEmail && (
-        <p>
-          <Link href="/signin/email_signin" className="font-light text-sm">
-            Sign in via magic link
-          </Link>
-        </p>
-      )}
     </div>
   );
 }

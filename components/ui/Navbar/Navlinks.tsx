@@ -12,7 +12,7 @@ interface NavlinksProps {
   user?: any;
 }
 
-export default function Navlinks({ user }: NavlinksProps) {
+export default function Navlinks({ user }: { user?: any }) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
 
   return (
@@ -22,13 +22,21 @@ export default function Navlinks({ user }: NavlinksProps) {
           <Logo />
         </Link>
         <nav className="ml-6 space-x-2 lg:block">
-          <Link href="/" className={s.link}>
-            Pricing
-          </Link>
           {user && (
-            <Link href="/account" className={s.link}>
-              Account
-            </Link>
+            <>
+              <Link href="/welcome" className={s.link}>
+                Dashboard
+              </Link>
+              <Link href="/calendar" className={s.link}>
+                Calendar
+              </Link>
+              <Link href="/lists" className={s.link}>
+                Lists
+              </Link>
+              <Link href="/account" className={s.link}>
+                Account
+              </Link>
+            </>
           )}
         </nav>
       </div>

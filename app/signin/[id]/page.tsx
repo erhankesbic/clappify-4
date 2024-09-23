@@ -10,7 +10,6 @@ import {
 } from '@/utils/auth-helpers/settings';
 import Card from '@/components/ui/Card';
 import PasswordSignIn from '@/components/ui/AuthForms/PasswordSignIn';
-import EmailSignIn from '@/components/ui/AuthForms/EmailSignIn';
 import Separator from '@/components/ui/AuthForms/Separator';
 import OauthSignIn from '@/components/ui/AuthForms/OauthSignIn';
 import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
@@ -75,13 +74,6 @@ export default async function SignIn({
             <PasswordSignIn
               allowEmail={allowEmail}
               redirectMethod={redirectMethod}
-            />
-          )}
-          {viewProp === 'email_signin' && (
-            <EmailSignIn
-              allowPassword={allowPassword}
-              redirectMethod={redirectMethod}
-              disableButton={searchParams.disable_button}
             />
           )}
           {viewProp === 'forgot_password' && (

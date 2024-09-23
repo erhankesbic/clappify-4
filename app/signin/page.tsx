@@ -7,5 +7,5 @@ export default function SignIn() {
     cookies().get('preferredSignInView')?.value || null;
   const defaultView = getDefaultSignInView(preferredSignInView);
 
-  return redirect(`/signin/${defaultView}`);
+  return redirect(`/signin/password_signin`);
 }
