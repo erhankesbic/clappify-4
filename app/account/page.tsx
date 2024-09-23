@@ -17,8 +17,9 @@ export default async function Account() {
     getSubscription(supabase)
   ]);
 
+  // Redirect to pricing page if user is not logged in
   if (!user) {
-    return redirect('/signin');
+    return redirect('/pricing'); // Changed from '/signin' to '/pricing'
   }
 
   return (
