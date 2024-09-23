@@ -1,32 +1,29 @@
 .root {
-  @apply bg-white text-zinc-800 cursor-pointer inline-flex px-10 rounded-sm leading-6  transition ease-in-out duration-150 shadow-sm font-semibold text-center justify-center uppercase py-4 border border-transparent items-center;
+  @apply bg-purple-500 text-white cursor-pointer inline-flex px-4 rounded-md leading-6 transition ease-in-out duration-150 shadow-sm font-semibold text-center justify-center uppercase py-2 border border-transparent items-center;
 }
 
 .root:hover {
-  @apply bg-zinc-800 text-white border border-white;
+  @apply bg-purple-600; /* Dunkleres Flieder bei Hover */
 }
 
 .root:focus {
-  @apply outline-none ring-2 ring-pink-500 ring-opacity-50;
+  @apply outline-none ring-2 ring-purple-300 ring-opacity-50;
 }
 
 .root[data-active] {
-  @apply bg-zinc-600;
+  @apply bg-purple-400; /* Aktiver Zustand */
 }
 
 .loading {
-  @apply bg-zinc-700 text-zinc-500 border-zinc-600 cursor-not-allowed;
+  @apply bg-purple-600 text-white border-purple-500 cursor-not-allowed;
 }
 
 .slim {
-  @apply py-2 transform-none normal-case;
+  @apply py-1 transform-none normal-case;
 }
 
 .disabled,
 .disabled:hover {
-  @apply text-zinc-400 border-zinc-600 bg-zinc-700 cursor-not-allowed;
+  @apply text-gray-400 border-gray-600 bg-gray-700 cursor-not-allowed;
   filter: grayscale(1);
-  -webkit-transform: translateZ(0);
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
 }
