@@ -122,30 +122,35 @@ export async function checkoutWithStripe(
 export async function createStripePortal(currentPath: string) {
   try {
     const supabase = createClient();
-    const {
-      error,
-      data: { user }
-    } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
 
-    if (!user) {
-      if (error) {
-        console.error(error);
-      }
+    if (error) {
+      console.error('Supabase auth error:', error);
       throw new Error('Could not get user session.');
+    }
+
+    if (!data.user) {
+      console.error('No user data returned from Supabase');
+      throw new Error('Could not get user session.');
+    }
+
+    const { id: uuid, email } = data.user;
+
+    if (!uuid || !email) {
+      console.error('Missing user id or email');
+      throw new Error('Invalid user data.');
     }
 
     let customer;
     try {
-      customer = await createOrRetrieveCustomer({
-        uuid: user.id || '',
-        email: user.email || ''
-      });
+      customer = await createOrRetrieveCustomer({ uuid, email });
     } catch (err) {
-      console.error(err);
+      console.error('Error in createOrRetrieveCustomer:', err);
       throw new Error('Unable to access customer record.');
     }
 
     if (!customer) {
+      console.error('No customer returned from createOrRetrieveCustomer');
       throw new Error('Could not get customer.');
     }
 
@@ -154,17 +159,21 @@ export async function createStripePortal(currentPath: string) {
         customer,
         return_url: getURL('/account')
       });
+      
       if (!url) {
+        console.error('No URL returned from Stripe billing portal session creation');
         throw new Error('Could not create billing portal');
       }
+      
+      console.log('Stripe portal URL created successfully:', url);
       return url;
     } catch (err) {
-      console.error(err);
+      console.error('Error creating Stripe billing portal session:', err);
       throw new Error('Could not create billing portal');
     }
   } catch (error) {
+    console.error('Top-level error in createStripePortal:', error);
     if (error instanceof Error) {
-      console.error(error);
       return getErrorRedirect(
         currentPath,
         error.message,
