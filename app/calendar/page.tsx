@@ -366,22 +366,22 @@ export default function Calendar() {
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
       <header className="flex justify-between items-center p-4 border-b border-gray-700">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => setIsEventDialogOpen(true)}><Plus /></Button>
+          <Button variant="flat" onClick={() => setIsEventDialogOpen(true)}><Plus /></Button>
           <h1 className="text-2xl font-bold">
             {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
           </h1>
         </div>
         <div className="flex space-x-2">
-          <Button variant="ghost" onClick={() => navigateDate('prev')}><ChevronLeft /></Button>
-          <Button variant="ghost" onClick={() => setCurrentDate(new Date())}>Today</Button>
-          <Button variant="ghost" onClick={() => navigateDate('next')}><ChevronRight /></Button>
+          <Button variant="flat" onClick={() => navigateDate('prev')}><ChevronLeft /></Button>
+          <Button variant="flat" onClick={() => setCurrentDate(new Date())}>Today</Button>
+          <Button variant="flat" onClick={() => navigateDate('next')}><ChevronRight /></Button>
         </div>
         <div className="flex space-x-2">
           {['Day', 'Week', 'Month', 'Year'].map((v) => (
             <Button
               key={v}
-              variant={view === v.toLowerCase() ? "secondary" : "ghost"}
-              onClick={() => setView(v.toLowerCase())}
+              variant={view === v.toLowerCase() ? "flat" : "slim"}
+              onClick={() => setView(v.toLowerCase() as "month" | "day" | "week" | "year")}
             >
               {v}
             </Button>
@@ -389,13 +389,17 @@ export default function Calendar() {
         </div>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input className="pl-8" placeholder="Search" />
+          <Input
+            className="pl-8"
+            placeholder="Search"
+            onChange={(e) => {/* Handle change */}}
+          />
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-64 p-4 border-r border-gray-700">
           <h2 className="font-bold mb-2">Calendars</h2>
-          <Button variant="outline" className="w-full mb-2" onClick={() => setIsCalendarDialogOpen(true)}>
+          <Button variant="flat" className="w-full mb-2" onClick={() => setIsCalendarDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> New Calendar
           </Button>
           {calendars.map((calendar: Calendar) => (
@@ -439,25 +443,51 @@ export default function Calendar() {
                 <Label htmlFor="title" className="text-right text-gray-300">
                   Title
                 </Label>
-                <Input id="title" name="title" defaultValue={currentEvent?.title} className="col-span-3 bg-gray-700 border-gray-600 text-gray-100" />
+                <Input
+                  id="title"
+                  name="title"
+                  defaultValue={currentEvent?.title}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                  onChange={(e) => {/* Handle change here */}}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="description" className="text-right text-gray-300">
                   Description
                 </Label>
-                <Input id="description" name="description" defaultValue={currentEvent?.description} className="col-span-3 bg-gray-700 border-gray-600 text-gray-100" />
+                <Input
+                  id="description"
+                  name="description"
+                  defaultValue={currentEvent?.description}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                  onChange={(e) => {/* Handle change here */}}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="start_time" className="text-right text-gray-300">
                   Start Time
                 </Label>
-                <Input id="start_time" name="start_time" type="datetime-local" defaultValue={currentEvent?.start_time} className="col-span-3 bg-gray-700 border-gray-600 text-gray-100" />
+                <Input
+                  id="start_time"
+                  name="start_time"
+                  type="datetime-local"
+                  defaultValue={currentEvent?.start_time}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                  onChange={(e) => {/* Handle change here */}}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="end_time" className="text-right text-gray-300">
                   End Time
                 </Label>
-                <Input id="end_time" name="end_time" type="datetime-local" defaultValue={currentEvent?.end_time} className="col-span-3 bg-gray-700 border-gray-600 text-gray-100" />
+                <Input
+                  id="end_time"
+                  name="end_time"
+                  type="datetime-local"
+                  defaultValue={currentEvent?.end_time}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                  onChange={(e) => {/* Handle change here */}}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="calendar_id" className="text-right text-gray-300">
@@ -478,7 +508,11 @@ export default function Calendar() {
             <div className="flex justify-between">
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">{currentEvent ? 'Update' : 'Create'}</Button>
               {currentEvent && (
-                <Button type="button" variant="destructive" onClick={() => handleEventDelete(currentEvent.id)} className="bg-red-600 hover:bg-red-700 text-white">
+                <Button
+                  type="button"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => handleEventDelete(currentEvent.id)}
+                >
                   Delete
                 </Button>
               )}
@@ -498,13 +532,24 @@ export default function Calendar() {
                 <Label htmlFor="name" className="text-right">
                   Name
                 </Label>
-                <Input id="name" name="name" className="col-span-3" />
+                <Input
+                  id="name"
+                  name="name"
+                  className="col-span-3"
+                  onChange={(e) => {/* Handle change */}}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="color" className="text-right">
                   Color
                 </Label>
-                <Input id="color" name="color" type="color" className="col-span-3" />
+                <Input
+                  id="color"
+                  name="color"
+                  type="color"
+                  className="col-span-3"
+                  onChange={(e) => {/* Handle change */}}
+                />
               </div>
             </div>
             <Button type="submit">Create</Button>
