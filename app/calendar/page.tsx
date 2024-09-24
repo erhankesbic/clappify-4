@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { ChevronLeft, ChevronRight, Search, Plus, Trash2, Edit, X } from 'lucide-react'
+import { useUser } from '@supabase/auth-helpers-react'
+import { ChevronLeft, ChevronRight, Search, Plus, Trash2, Edit, X, Menu } from 'lucide-react'
 import  Button  from "@/components/ui/Button"
 import  Input  from "@/components/ui/Input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -48,6 +49,8 @@ export default function Calendar() {
   const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false)
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const user = useUser()
 
   useEffect(() => {
     fetchCalendars()
@@ -55,7 +58,13 @@ export default function Calendar() {
   }, [currentDate, view, selectedCalendars])
 
   const fetchCalendars = async () => {
-    const { data, error } = await supabase.from('calendars').select('*')
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('calendars')
+      .select('*')
+      .eq('user_id', user.id)
+
     if (error) console.error('Error fetching calendars:', error)
     else setCalendars(data as Calendar[])
   }
@@ -88,11 +97,14 @@ export default function Calendar() {
         endDate = new Date(currentDate.setHours(23, 59, 59, 999));
     }
 
+    if (!user) return [];
+
     const { data, error } = await supabase
       .from('events')
       .select('*, calendars(id, color)')
       .gte('start_time', startDate.toISOString())
       .lte('end_time', endDate.toISOString())
+      .eq('user_id', user.id)
       .in('calendar_id', selectedCalendars.length > 0 ? selectedCalendars : [null]);
 
     if (error) {
@@ -106,6 +118,17 @@ export default function Calendar() {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const eventData = Object.fromEntries(formData)
+
+    if (!user) {
+      console.error('User not logged in')
+      return
+    }
+
+    // Add user_id to eventData
+    const eventDataWithUser = {
+      ...eventData,
+      user_id: user.id
+    }
 
     // Validate event data
     if (!eventData.title || !eventData.start_time || !eventData.end_time) {
@@ -122,8 +145,9 @@ export default function Calendar() {
     if (currentEvent) {
       const { error } = await supabase
         .from('events')
-        .update(eventData)
+        .update(eventDataWithUser)
         .eq('id', currentEvent.id)
+        .eq('user_id', user.id)
 
       if (error) console.error('Error updating event:', error)
       else {
@@ -134,7 +158,7 @@ export default function Calendar() {
     } else {
       const { error } = await supabase
         .from('events')
-        .insert(eventData)
+        .insert(eventDataWithUser)
 
       if (error) console.error('Error creating event:', error)
       else {
@@ -147,10 +171,16 @@ export default function Calendar() {
   }
 
   const handleEventDelete = async (eventId: string) => {
+    if (!user) {
+      console.error('User not logged in')
+      return
+    }
+
     const { error } = await supabase
       .from('events')
       .delete()
       .eq('id', eventId)
+      .eq('user_id', user.id)
 
     if (error) console.error('Error deleting event:', error)
     else {
@@ -164,13 +194,31 @@ export default function Calendar() {
     const formData = new FormData(event.currentTarget)
     const calendarData = Object.fromEntries(formData)
 
-    const { error } = await supabase
-      .from('calendars')
-      .insert(calendarData)
+    if (!user) {
+      console.error('User not logged in')
+      return
+    }
 
-    if (error) console.error('Error creating calendar:', error)
-    else {
-      fetchCalendars()
+    // Validate calendar data
+    if (!calendarData.name || !calendarData.color) {
+      console.error('Please fill in all required fields.')
+      return
+    }
+
+    const calendarDataWithUser = {
+      ...calendarData,
+      user_id: user.id
+    }
+
+    const { data, error } = await supabase
+      .from('calendars')
+      .insert(calendarDataWithUser)
+      .select()
+
+    if (error) {
+      console.error('Error creating calendar:', error)
+    } else {
+      setCalendars([...calendars, data[0] as Calendar])
       setIsCalendarDialogOpen(false)
     }
   }
@@ -208,7 +256,7 @@ export default function Calendar() {
     return (
       <div 
         key={event.id} 
-        className="text-white p-1 text-xs rounded cursor-pointer"
+        className="text-white p-1 text-xs rounded cursor-pointer truncate"
         style={{ backgroundColor: event.calendars?.color || '#3B82F6' }}
         onClick={() => handleEventClick(event)}
       >
@@ -222,11 +270,11 @@ export default function Calendar() {
     return (
       <div className="grid grid-cols-1 gap-px bg-gray-700">
         {hours.map((hour) => (
-          <div key={hour} className="relative h-16">
-            <div className="absolute left-0 -mt-3 w-16 pr-2 text-right text-xs leading-5 text-gray-400">
+          <div key={hour} className="relative h-16 sm:h-24">
+            <div className="absolute left-0 -mt-3 w-12 sm:w-16 pr-2 text-right text-xs leading-5 text-gray-400">
               {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
             </div>
-            <div className="border-t border-gray-700 p-2 h-full">
+            <div className="ml-12 sm:ml-16 border-t border-gray-700 p-1 sm:p-2 h-full">
               {events.filter(event => new Date(event.start_time).getHours() === hour).map(renderEvent)}
             </div>
           </div>
@@ -238,20 +286,20 @@ export default function Calendar() {
   const renderWeekView = () => {
     const hours = Array.from({ length: 24 }, (_, i) => i)
     return (
-      <div className="grid grid-cols-8 gap-px bg-gray-700">
+      <div className="grid grid-cols-8 gap-px bg-gray-700 text-xs sm:text-sm">
         <div className="col-span-1"></div>
         {weekDays.map((day, index) => (
-          <div key={day} className="p-2 text-center font-semibold">
-            {day} {new Date(currentDate.getTime() + index * 86400000).getDate()}
+          <div key={day} className="p-1 sm:p-2 text-center font-semibold">
+            {day.slice(0, 1)} {new Date(currentDate.getTime() + index * 86400000).getDate()}
           </div>
         ))}
         {hours.map((hour) => (
           <React.Fragment key={hour}>
-            <div className="p-2 text-right text-sm text-gray-400">
-              {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+            <div className="p-1 sm:p-2 text-right text-gray-400">
+              {hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`}
             </div>
             {weekDays.map((_, dayIndex) => (
-              <div key={dayIndex} className="border-t border-l border-gray-700 p-2 h-16">
+              <div key={dayIndex} className="border-t border-l border-gray-700 p-1 sm:p-2 h-12 sm:h-16">
                 {events.filter(event => 
                   new Date(event.start_time).getHours() === hour &&
                   new Date(event.start_time).getDay() === dayIndex
@@ -276,16 +324,16 @@ export default function Calendar() {
     })
 
     return (
-      <div className="grid grid-cols-7 gap-px bg-gray-700">
+      <div className="grid grid-cols-7 gap-px bg-gray-700 text-xs sm:text-sm">
         {weekDays.map((day) => (
-          <div key={day} className="p-2 text-center font-semibold">{day}</div>
+          <div key={day} className="p-1 sm:p-2 text-center font-semibold">{day.slice(0, 3)}</div>
         ))}
         {days.map((day, index) => (
-          <div key={index} className={`p-2 h-24 ${day ? 'border border-gray-700' : ''}`}>
+          <div key={index} className={`p-1 sm:p-2 h-16 sm:h-24 ${day ? 'border border-gray-700' : ''}`}>
             {day && (
               <>
-                <span className="text-sm">{day}</span>
-                <div className="mt-1">
+                <span>{day}</span>
+                <div className="mt-1 overflow-y-auto max-h-12 sm:max-h-20">
                   {events.filter(event => new Date(event.start_time).getDate() === day).map(renderEvent)}
                 </div>
               </>
@@ -298,9 +346,9 @@ export default function Calendar() {
 
   const renderYearView = () => {
     return (
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
         {months.map((month, index) => (
-          <div key={month} className="p-4 border border-gray-700 rounded">
+          <div key={month} className="p-2 sm:p-4 border border-gray-700 rounded">
             <h3 className="font-semibold mb-2">{month}</h3>
             <div className="grid grid-cols-7 gap-1 text-xs">
               {weekDays.map((day) => (
@@ -364,19 +412,19 @@ export default function Calendar() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-      <header className="flex justify-between items-center p-4 border-b border-gray-700">
-        <div className="flex items-center space-x-2">
+      <header className="flex flex-col sm:flex-row justify-between items-center p-4 border-b border-gray-700">
+        <div className="flex items-center space-x-2 mb-4 sm:mb-0">
           <Button variant="flat" onClick={() => setIsEventDialogOpen(true)}><Plus /></Button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-xl sm:text-2xl font-bold">
             {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
           </h1>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mb-4 sm:mb-0">
           <Button variant="flat" onClick={() => navigateDate('prev')}><ChevronLeft /></Button>
           <Button variant="flat" onClick={() => setCurrentDate(new Date())}>Today</Button>
           <Button variant="flat" onClick={() => navigateDate('next')}><ChevronRight /></Button>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mb-4 sm:mb-0">
           {['Day', 'Week', 'Month', 'Year'].map((v) => (
             <Button
               key={v}
@@ -387,10 +435,10 @@ export default function Calendar() {
             </Button>
           ))}
         </div>
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
-            className="pl-8"
+            className="pl-8 w-full"
             placeholder="Search"
             onChange={(e) => {/* Handle change */}}
           />
@@ -522,37 +570,39 @@ export default function Calendar() {
       </Dialog>
 
       <Dialog open={isCalendarDialogOpen} onOpenChange={setIsCalendarDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-gray-800 text-gray-100 border border-gray-700">
           <DialogHeader>
-            <DialogTitle>Create Calendar</DialogTitle>
+            <DialogTitle className="text-gray-100">Create Calendar</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCalendarSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
+                <Label htmlFor="name" className="text-right text-gray-300">
                   Name
                 </Label>
                 <Input
                   id="name"
                   name="name"
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
                   onChange={(e) => {/* Handle change */}}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="color" className="text-right">
+                <Label htmlFor="color" className="text-right text-gray-300">
                   Color
                 </Label>
                 <Input
                   id="color"
                   name="color"
                   type="color"
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 h-10"
                   onChange={(e) => {/* Handle change */}}
                 />
               </div>
             </div>
-            <Button type="submit">Create</Button>
+            <div className="flex justify-end">
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Create</Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
