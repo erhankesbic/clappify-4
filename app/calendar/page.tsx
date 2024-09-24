@@ -46,7 +46,7 @@ export default function Calendar() {
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([])
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false)
-  const [currentEvent, setCurrentEvent] = useState(null)
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
   useEffect(() => {
@@ -102,9 +102,9 @@ export default function Calendar() {
     return data as Event[];
   }
 
-  const handleEventSubmit = async (event) => {
+  const handleEventSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const formData = new FormData(event.target)
+    const formData = new FormData(event.currentTarget)
     const eventData = Object.fromEntries(formData)
 
     // Validate event data
@@ -114,7 +114,7 @@ export default function Calendar() {
     }
 
     // Ensure end time is after start time
-    if (new Date(eventData.start_time) >= new Date(eventData.end_time)) {
+    if (new Date(eventData.start_time as string) >= new Date(eventData.end_time as string)) {
         console.error('End time must be after start time.')
         return
     }
