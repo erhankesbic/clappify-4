@@ -18,12 +18,27 @@ const supabase = createClient(
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
+// Add this interface to define the structure of an event
+interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  calendar_id: string;
+  calendars?: {
+    id: string;
+    color: string;
+  };
+}
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState('week')
-  const [events, setEvents] = useState([])
+  // Update the events state with the correct type
+  const [events, setEvents] = useState<Event[]>([])
   const [calendars, setCalendars] = useState([])
-  const [selectedCalendars, setSelectedCalendars] = useState([])
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([])
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false)
   const [currentEvent, setCurrentEvent] = useState(null)
@@ -40,7 +55,8 @@ export default function Calendar() {
     else setCalendars(data)
   }
 
-  const fetchEvents = async () => {
+  // Update the return type of fetchEvents
+  const fetchEvents = async (): Promise<Event[]> => {
     let startDate, endDate
     switch (view) {
       case 'day':
