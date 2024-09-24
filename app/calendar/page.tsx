@@ -146,19 +146,22 @@ export default function Calendar() {
     setIsEventDialogOpen(false)
   }
 
-  const handleEventDelete = async (eventId) => {
+  const handleEventDelete = async (eventId: string) => {
     const { error } = await supabase
       .from('events')
       .delete()
       .eq('id', eventId)
 
     if (error) console.error('Error deleting event:', error)
-    else fetchEvents()
+    else {
+      const updatedEvents = await fetchEvents()
+      setEvents(updatedEvents)
+    }
   }
 
-  const handleCalendarSubmit = async (event) => {
+  const handleCalendarSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const formData = new FormData(event.target)
+    const formData = new FormData(event.currentTarget)
     const calendarData = Object.fromEntries(formData)
 
     const { error } = await supabase
@@ -172,7 +175,7 @@ export default function Calendar() {
     }
   }
 
-  const navigateDate = (direction) => {
+  const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate)
     switch (view) {
       case 'day':
