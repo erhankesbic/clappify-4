@@ -296,7 +296,7 @@ export default function Calendar() {
         {hours.map((hour) => (
           <React.Fragment key={hour}>
             <div className="p-1 sm:p-2 text-right text-gray-400">
-              {hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`}
+              {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
             </div>
             {weekDays.map((_, dayIndex) => (
               <div key={dayIndex} className="border-t border-l border-gray-700 p-1 sm:p-2 h-12 sm:h-16">
