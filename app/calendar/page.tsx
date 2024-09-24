@@ -47,7 +47,7 @@ export default function Calendar() {
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false)
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null)
-  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
 
   useEffect(() => {
     fetchCalendars()
@@ -194,7 +194,7 @@ export default function Calendar() {
     setCurrentDate(newDate)
   }
 
-  const handleEventClick = (event) => {
+  const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
   }
 
@@ -203,7 +203,7 @@ export default function Calendar() {
   }
 
   // Modify the event rendering in day, week, and month views
-  const renderEvent = (event) => {
+  const renderEvent = (event: Event) => {
     if (!selectedCalendars.includes(event.calendar_id)) return null;
     return (
       <div 
@@ -319,7 +319,6 @@ export default function Calendar() {
   const EventDetailsWindow = () => {
     if (!selectedEvent) return null
 
-    // Funktion zum Formatieren des Datums für datetime-local Input
     const formatDateForInput = (dateString: string) => {
       const date = new Date(dateString);
       return date.toISOString().slice(0, 16);
