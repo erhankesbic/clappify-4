@@ -18,7 +18,7 @@ const supabase = createClient(
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-// Add this interface to define the structure of an event
+// Define interfaces for our data structures
 interface Event {
   id: string;
   title: string;
@@ -32,12 +32,17 @@ interface Event {
   };
 }
 
+interface Calendar {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState('week')
-  // Update the events state with the correct type
   const [events, setEvents] = useState<Event[]>([])
-  const [calendars, setCalendars] = useState([])
+  const [calendars, setCalendars] = useState<Calendar[]>([])
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([])
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false)
@@ -52,10 +57,9 @@ export default function Calendar() {
   const fetchCalendars = async () => {
     const { data, error } = await supabase.from('calendars').select('*')
     if (error) console.error('Error fetching calendars:', error)
-    else setCalendars(data)
+    else setCalendars(data as Calendar[])
   }
 
-  // Update the return type of fetchEvents
   const fetchEvents = async (): Promise<Event[]> => {
     let startDate, endDate
     switch (view) {
@@ -386,7 +390,7 @@ export default function Calendar() {
           <Button variant="outline" className="w-full mb-2" onClick={() => setIsCalendarDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> New Calendar
           </Button>
-          {calendars.map((calendar) => (
+          {calendars.map((calendar: Calendar) => (
             <div key={calendar.id} className="flex items-center mb-2">
               <input
                 type="checkbox"
