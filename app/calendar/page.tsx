@@ -329,7 +329,7 @@ export default function Calendar() {
         <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">{selectedEvent.title}</h2>
-            <Button variant="ghost" size="icon" onClick={closeEventDetails}><X /></Button>
+            <Button onClick={closeEventDetails}><X /></Button>
           </div>
           <p className="mb-2">{selectedEvent.description}</p>
           <p className="mb-2">
@@ -350,7 +350,7 @@ export default function Calendar() {
             }}>
               Edit
             </Button>
-            <Button variant="destructive" onClick={() => {
+            <Button onClick={() => {
               handleEventDelete(selectedEvent.id)
               closeEventDetails()
             }}>
