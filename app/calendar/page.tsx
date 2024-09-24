@@ -40,7 +40,7 @@ interface Calendar {
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState('week')
+  const [view, setView] = useState<'day' | 'week' | 'month' | 'year'>('week')
   const [events, setEvents] = useState<Event[]>([])
   const [calendars, setCalendars] = useState<Calendar[]>([])
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([])
@@ -61,25 +61,31 @@ export default function Calendar() {
   }
 
   const fetchEvents = async (): Promise<Event[]> => {
-    let startDate, endDate
+    let startDate: Date, endDate: Date;
+    
     switch (view) {
       case 'day':
-        startDate = new Date(currentDate.setHours(0, 0, 0, 0))
-        endDate = new Date(currentDate.setHours(23, 59, 59, 999))
-        break
+        startDate = new Date(currentDate.setHours(0, 0, 0, 0));
+        endDate = new Date(currentDate.setHours(23, 59, 59, 999));
+        break;
       case 'week':
-        startDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()))
-        endDate = new Date(startDate)
-        endDate.setDate(endDate.getDate() + 6)
-        break
+        startDate = new Date(currentDate);
+        startDate.setDate(startDate.getDate() - startDate.getDay());
+        endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+        break;
       case 'month':
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-        break
+        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        break;
       case 'year':
-        startDate = new Date(currentDate.getFullYear(), 0, 1)
-        endDate = new Date(currentDate.getFullYear(), 11, 31)
-        break
+        startDate = new Date(currentDate.getFullYear(), 0, 1);
+        endDate = new Date(currentDate.getFullYear(), 11, 31);
+        break;
+      default:
+        // Default to current day if view is not recognized
+        startDate = new Date(currentDate.setHours(0, 0, 0, 0));
+        endDate = new Date(currentDate.setHours(23, 59, 59, 999));
     }
 
     const { data, error } = await supabase
@@ -87,13 +93,13 @@ export default function Calendar() {
       .select('*, calendars(id, color)')
       .gte('start_time', startDate.toISOString())
       .lte('end_time', endDate.toISOString())
-      .in('calendar_id', selectedCalendars.length > 0 ? selectedCalendars : [null])
+      .in('calendar_id', selectedCalendars.length > 0 ? selectedCalendars : [null]);
 
     if (error) {
-      console.error('Error fetching events:', error)
-      return []
+      console.error('Error fetching events:', error);
+      return [];
     }
-    return data
+    return data as Event[];
   }
 
   const handleEventSubmit = async (event) => {
