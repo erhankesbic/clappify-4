@@ -1,4 +1,4 @@
-//
+
 
 import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/utils/supabase/queries';

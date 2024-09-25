@@ -1,3 +1,5 @@
+
+
 import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/utils/supabase/queries';
 import { redirect as nextRedirect } from 'next/navigation';
